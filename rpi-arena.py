@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import spidev
+import spidev #SPI interface
 import time
-import thread
+import thread #for multithreading
 import RPi.GPIO as GPIO
 
 #main program loop for non-time critical tasks
@@ -10,6 +10,7 @@ def main():
 		[adc1,adc2] = analogReadSPI(0)
 		print adc1, 
 		print adc2
+		time.sleep(0.100)
 
 def analogReadSPI(device):
 
@@ -24,7 +25,7 @@ def analogReadSPI(device):
 	spi.close()
 	return [adc1,adc2]
 
-def quit()
+def quit():
 	spi.close()
 	GPI.output(2, False)
 	
@@ -32,4 +33,6 @@ def quit()
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(2, GPIO.OUT)
 GPIO.output(2, True)
+time.sleep(1)
+GPIO.output(2, False)
 main()
