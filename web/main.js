@@ -12,8 +12,9 @@ var options;
 //dummy test variables
 var x = 0;
 var y = 0;
-var windowSize = 3600;
+var windowSize = 10;
 var iter = 0;
+var drawIter = 0;
 
 function initPlot() {
 	data = new google.visualization.DataTable();
@@ -21,7 +22,7 @@ function initPlot() {
 	data.addColumn('number', 'adc2');
 	plot = new google.visualization.LineChart(document.getElementById('chart_div'));
 	options = {title: 'Data test',
-						 vAxis: {minValue: 0, maxValue: 1}};	
+						 vAxis: {minValue: -1, maxValue: 1}};	
 
 	drawPlot();
 	update();
@@ -36,17 +37,26 @@ function drawPlot() {
 }
 
 function update() {
-	y = Math.sin(x);
-	x = x + 0.1;
-	var row = data.addRow([x,y]);
+	for (i = 0; i < 1; i++) {
+		y = Math.sin(x);
+		x = x + 0.2;
+		var row = data.addRow([x,y]);
+	}
+	
+	if (data.getNumberOfRows() > windowSize) {
+		
+//		options = {title: 'Data test',
+//							 animation:{
+//							 duration: 500,
+//							 easing: 'linear',
+//							 startup: true
+//							 },
+//							 vAxis: {minValue: 0, maxValue: 1}};	
+		data.removeRows(0,1);
+	}
 	drawPlot();
 	console.log("loop");
-	if ( iter < windowSize ) {
-		iter = iter + 1;		
-	} else {
-		data.removeRow(row - windowSize);
-  }
 	
-	var t = setTimeout(update, 16); 
+	var t = setTimeout(update, 32); 
 }
 
