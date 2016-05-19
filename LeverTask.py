@@ -5,19 +5,30 @@ import spidev #SPI
 
 #state variables
 running = True
+count = 0
 
-#start
-def start():
-    main()
+#Pin Definitions
+pump = 5
+verticalR = 26
+verticalL = 19
+horizontalR = 13 
+horizontalL = 6 
 
-# main loop for motor control etc
-def main():
-    while running:
-        [leftLever, rightLever] = readMCP3002(0)
-        print leftLever,
-        print rightLever
-        time.sleep(0.002)
+#open file for writing
+dataFile = open('debug.csv', 'w')
+dataFile.write('1,1\n2,2\n3,3\n4,4\n')
 
+#initialize GPIO pins for linear actuators 
+GPIO.setmode(GPIO.BCM)
+for pin in [pump, verticalR, verticalL, horizontalR, horizontalL]:
+    GPIO.setup(pin, GPIO.OUT)
+horizontalRP = GPIO.PWM(horizontalR, 20)
+
+horizontalRP.start(2)
+time.sleep(5)
+horizontalRP.ChangeDutyCycle(2.2)
+time.sleep(5)
+horizontalRP.stop()
 # function to read from the mcp3002
 def readMCP3002(device):
      
@@ -31,7 +42,19 @@ def readMCP3002(device):
     adc2 = msb[0]<<8|lsb[0]
     spi.close()
     return [adc1,adc2]
-               
-#call start and begin running
-if __name__ == "__main__"
-    start()
+
+# main loop for motor control etc
+try:
+    while running:
+        [leftLever, rightLever] = readMCP3002(0)
+        print leftLever,
+        print rightLever,
+        print count
+        time.sleep(0.002)
+        count = (count + 1)% 5000
+
+
+except KeyboardInterrupt:
+    GPIO.cleanup()
+    dataFile.close()
+
