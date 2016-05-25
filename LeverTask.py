@@ -2,6 +2,11 @@
 import RPi.GPIO as GPIO
 import time
 import spidev #SPI 
+import gspread
+import json
+from oauth2client.service_account import ServiceAccountCredentials
+
+
 
 #state variables
 running = True
@@ -16,7 +21,6 @@ horizontalL = 6
 
 #open file for writing
 dataFile = open('debug.csv', 'w')
-dataFile.write('1,1\n2,2\n3,3\n4,4\n')
 
 #initialize GPIO pins for linear actuators 
 GPIO.setmode(GPIO.BCM)
@@ -24,11 +28,12 @@ for pin in [pump, verticalR, verticalL, horizontalR, horizontalL]:
     GPIO.setup(pin, GPIO.OUT)
 horizontalRP = GPIO.PWM(horizontalR, 20)
 
-horizontalRP.start(2)
-time.sleep(5)
-horizontalRP.ChangeDutyCycle(2.2)
-time.sleep(5)
-horizontalRP.stop()
+#horizontalRP.start(2.2)
+#time.sleep(5)
+#horizontalRP.ChangeDutyCycle(2)
+#time.sleep(5)
+#horizontalRP.stop()
+
 # function to read from the mcp3002
 def readMCP3002(device):
      
@@ -43,15 +48,20 @@ def readMCP3002(device):
     spi.close()
     return [adc1,adc2]
 
+start = time.time()
 # main loop for motor control etc
 try:
     while running:
+        now = round((time.time()-start) * 1000,2)
         [leftLever, rightLever] = readMCP3002(0)
+        dataFile.write("," + repr(leftLever) + "," + repr(rightLever)+ "\n")
+        dataFile.write(repr(now)) #time ms
+      
         print leftLever,
         print rightLever,
-        print count
-        time.sleep(0.002)
-        count = (count + 1)% 5000
+        print now
+        time.sleep(0.001)
+        count = (count + 1) % 5000
 
 
 except KeyboardInterrupt:

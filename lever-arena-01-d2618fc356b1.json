@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "lever-arena-01",
+  "private_key_id": "d2618fc356b141fb6eaa939b0ddf10bc45771539",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDa5XMf3dF2wOLg\nUVBn3Y9Ma7ZNrJsLY7a5u8ypF7Rxs/YTPTGgSs4Qd460psSesROIPrMjccSH7s6N\nJiPSg0pTGZTeiEME9+4CzuHGO7XSV4ErDygznxsOTyOoZID4hM+d8uJN6uJ5hXQD\nezPv5/keLBkkm4WQ/IEySrmjj7QnWfQEgITsS8WBWnoJ+2wYnKj/t6+tdm01KV+5\ncrfk2IL+AtWGTGsqJnien4r6o5n/HXtNeuuwmqY7EgXZ/B6asfdNk5YLD0gDBPR6\nkdbeI4Kz0GgUMz+0U5Z6r0RMSte0ocJ7oYVSH0jMKEsGYrsbNng7PMiEyzUL/p40\noT03+TKTAgMBAAECggEBAJ5CAafqYYRwFBeF8pIFd5MS1Oz3e+kSIIvMIT2na8hB\nCgoC1hxDuRPivIQThlgNQkfgvPdFS4fTufYGuyN51IScHCt/bKTs82GIXWdKyDvZ\nFAQjozcfMxp3URpv/2at7sUNU1xuE2s0dxoFOxmaJ1wPGeaDol+ej3Hi4LBGN0Oy\nyGOTIwQnrKf8VT5WojaKh8G9F3rmqtlhGr72nrPQlXUxY/wxV+ZPKd0YZafsd7Nq\ncJkLeoDQypVowaV6EfKDlTz5bQM3G++3qKuTcE0x/dcj86ojzbwjaV1IWeUm3cPD\npsD019Qw+v8vwofiMI4odOw9Z151k+Tbqx51HPW3eEECgYEA/DSRglvDZd8zLrjm\nxm+TmjbiG29ABbvJENPtY/7cUNYY30zdz59QIhKfz2EKyokFvlxkmpmTm7mb9G8I\nPfEAwh879oOo438ZOFv6H8SYWdQIBxZ7aGexcC8DxURmV5q0BUY99MXpPUtIXTZk\ndYU/1YbSqC9lHQbwpbppco8v/DECgYEA3jCVTBHEKFpSciYr6LQxmXbuv/7mjP3Y\nOu1WOiKQ9pLw0S8xGbv3J4IDU7ulMiPyQ3R8NP5JOtE7rbusZoAPXuj0Z4pnQDmZ\nzaEHXIAnX5ar/56ehhKRU+Gn5DrQ79y3jlnydMgzU4XqvHxoFGrlmYxo5YS2VfIE\nYtEHyN8zngMCgYEArvhddt3oytU1shVvbX3dHiEzbqsY9KFaFgWhbT1UZfSS3uB6\nBl/VfT4EhyAhF3BGftGkrikb4e68RrF9O1PnHcYDmLuwwNvdiF8vQTjoJXHXe+ta\nBI3j6RuE9yfEBMT8XahktVtUvERtWNWyjmG6bo4RucLf2GqHK8MPAv5Z4RECgYEA\nr6Jd0eTVV0SWmW79FJSkBHiUH6bB3j+mlmYX3BqI1rCutdyFBp+jrlJCiQTyf6EU\nlyfUKxu7DUhp0Vph3CBshgzFbbdlCMq/fmFE7WTMOu5ihcx/6OFyiYj96xZnJMQn\nQNpvIstCb0qTlG0O5NzfI7JvFMcETwnhV69+ZNWy+rsCgYBHlOnM3KNPKx0P/o9H\neA8cwoIIix0mp8oqw6mQzwuyCWnKaXt31TRLTVUYcG6u0YnLVRqraNTsqg6LAQ01\nJ/tI1xoSqFENMeUa5qWvbOnTWJXW7oTEn8u0jITDVEi1mMrIGKB/FmNVYOdgYB82\nd4WY7Nan/Jc2lhIBFSeM0jwxuw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "lever-arena-01@lever-arena-01.iam.gserviceaccount.com",
+  "client_id": "109197475465650721209",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/lever-arena-01%40lever-arena-01.iam.gserviceaccount.com"
+}
