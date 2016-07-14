@@ -1,11 +1,28 @@
 #!/usr/bin/python
+
+#Raspberry pi includes
 import RPi.GPIO as GPIO
 import time
 import spidev #SPI 
-import gspread
-import json
-from oauth2client.service_account import ServiceAccountCredentials
 
+#Google Drive imports
+from oauth2client.service_account import ServiceAccountCredentials
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+#initialize Google Drive Credentials and connect
+oauthfile = 'lever-arena-01-d2618fc356b1.json'
+scope = ['https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(oauthfile,scope)
+gauth = GoogleAuth()
+gauth.credentials = credentials
+gauth.Authorize()
+drive = GoogleDrive(gauth)
+#TODO ensure continued program function if google drive doesn't load
+
+#Create new file to log data to
+dataFile = open('debug.csv', 'w') #open file for writing
+driveFile = drive.CreateFile({'parents' : [{'id' : '0B8LTj-6zmvAPQTZZS2tSaXR4UTA'}],'title': 'debug.csv'})
 
 
 #state variables
@@ -19,8 +36,6 @@ verticalL = 19
 horizontalR = 13 
 horizontalL = 6 
 
-#open file for writing
-dataFile = open('debug.csv', 'w')
 
 #initialize GPIO pins for linear actuators 
 GPIO.setmode(GPIO.BCM)
