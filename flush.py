@@ -8,5 +8,6 @@ GPIO.setup(5, GPIO.OUT)
 pump = GPIO.PWM(5,1000)
 
 pump.start(75)
-time.sleep(5)
+time.sleep(4)
 pump.stop()
+GPIO.output(5,False)
