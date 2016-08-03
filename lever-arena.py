@@ -6,6 +6,7 @@ import mcp3002
 import RPi.GPIO as GPIO
 import os
 import datetime
+import random
 
 #gdrive
 LOGGING = False
@@ -37,7 +38,7 @@ pump = GPIO.PWM(5,1000)
 #Task parameters
 timeout = 4 #time in seconds
 rewardTime = time.time()
-threshold = 700 #to be changed later
+threshold = 600 #to be changed later
 
 #State Parameters
 leverL = 0
@@ -79,63 +80,61 @@ def main():
 	resetTime = 10
 	reset = False
 	#reset the actuator to default position
-	setActuator(hl,11.5,5)
-	setActuator(vl,13.5,5)
+	setActuator(hl,10,2)
+	time.sleep(0.5)
+	setActuator(vl,13.5,2)
 	#Loop through vl 9.5  11.5 13.5
 	# 						hl 10.5 12.0 13.5 15.0
-	for v in [13.5, 11.5, 9.5]:
-		setActuator(vl,v,1)
-		for h in [11.5, 12.5, 13.5, 14.5, 15.5]:
-			setActuator(hl,h,1)
-			successes = 0
-			while successes < 3:
-				#get new data
-				[leverL,leverR] = mcp3002.read(lever) 
-				[adc3,nose] = mcp3002.read(poke) 
-				if nose < 100:
-					nose = 0
-				else:
-					nose = 1
-				currentTime = time.time()
+	while True:
+		for v in [13.5, 13, 12.5]:
+			setActuator(vl,v,1)
+			for h in [10, 11, 12]:
+				thresholds = [700, 600]
+				threshold = thresholds[random.randrange(0,2)]
+				print threshold
+				setActuator(hl,h,1)
+				successes = 0
+				while successes < 3:
+					#get new data
+					[leverL,leverR] = mcp3002.read(lever) 
+					[adc3,nose] = mcp3002.read(poke) 
+					currentTime = time.time()
 
-				#check for power switch
-				if (GPIO.input(14) > 0):
-					os.system("sudo shutdown -h now")
-				
-				#reset switching
-				#put into function
-				if leverL > 400:
-					resetTimer = time.time()
-					GPIO.output(LED,False)
-				if leverL < 400:
-					GPIO.output(LED,True)
-				if (time.time() - resetTimer > resetTime):
-					GPIO.output(LED,False)
-					reset = True
-					break
+					#check for power switch
+					if (GPIO.input(14) > 0):
+						os.system("sudo shutdown -h now")
 					
-				if (leverL > threshold and nose < 100 and currentTime - rewardTime > timeout):
-					successes = successes + 1
-					rewardTime = time.time()
-					pump.start(50)
-					GPIO.output(LED,True)
-					time.sleep(0.5)
-					GPIO.output(LED,False)
-					pump.stop()
+					#reset switching
+					#put into function
+					if leverL > 400:
+						resetTimer = time.time()
+						GPIO.output(LED,False)
+					if leverL < 400:
+						GPIO.output(LED,True)
+					if (time.time() - resetTimer > resetTime):
+						GPIO.output(LED,False)
+						reset = True
+						break
+						
+					if (leverL > threshold and nose < 100 and currentTime - rewardTime > timeout):
+						successes = successes + 1
+						rewardTime = time.time()
+						pump.start(50)
+						GPIO.output(LED,True)
+						time.sleep(0.5)
+						GPIO.output(LED,False)
+						pump.stop()
 
-				#log data if change
-				if LOGGING:	
-					data = open(fileName,"a")
-					data.write(str(currentTime) + "," + str(leverL) + "," + str(leverR) + "," + str(nose))	
-					data.close()
-				
-				time.sleep(0.05)
-			successes = 0
+					#log data if change
+					if LOGGING:	
+						data = open(fileName,"a")
+						data.write(str(currentTime) + "," + str(leverL) + "," + str(leverR) + "," + str(nose) + "," + str(threshold))	
+						data.close()
+					
+					time.sleep(0.05)
+				successes = 0
+				if reset:
+					break
 			if reset:
 				break
-		if reset:
-			break
-	lever.close()
-	poke.close()
-	main()
 main()
