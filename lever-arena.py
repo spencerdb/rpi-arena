@@ -7,9 +7,10 @@ import RPi.GPIO as GPIO
 import os
 import datetime
 import random
+from servo import setActuator
 
 #gdrive
-LOGGING = False
+LOGGING = True
 
 
 #Pin Definition 
@@ -27,10 +28,6 @@ LED = 15
 GPIO.setmode(GPIO.BCM)
 for pin in [pump, verticalR, verticalL, horizontalR, horizontalL, LED]:
 	GPIO.setup(pin, GPIO.OUT) 
-vr = GPIO.PWM(26,100)
-vl = GPIO.PWM(19,100)
-hr = GPIO.PWM(13,100)
-hl = GPIO.PWM(6,100)
 
 GPIO.setup(power,GPIO.IN)
 pump = GPIO.PWM(5,1000)
@@ -39,6 +36,7 @@ pump = GPIO.PWM(5,1000)
 timeout = 4 #time in seconds
 rewardTime = time.time()
 threshold = 600 #to be changed later
+previousLever = 0
 
 #State Parameters
 leverL = 0
@@ -60,16 +58,8 @@ except OSError:
 fileName = "data/" + fileName + ".csv"
 if LOGGING:
 	data = open(fileName,"w")
-	data.write("time,leverL,leverR,nose")
+	data.write("time,leverL,nose,threshold,horizontal,vertical\n")
 	data.close()
-
-def setActuator(actuator, duty, wait):
-	actuator.ChangeFrequency(100)
-	actuator.start(duty)
-	actuator.ChangeDutyCycle(duty)
-	time.sleep(wait)
-	actuator.stop()
-
 
 #main program loop for non-time critical tasks
 def main():
@@ -80,19 +70,18 @@ def main():
 	resetTime = 10
 	reset = False
 	#reset the actuator to default position
-	setActuator(hl,10,2)
 	time.sleep(0.5)
-	setActuator(vl,13.5,2)
 	#Loop through vl 9.5  11.5 13.5
 	# 						hl 10.5 12.0 13.5 15.0
 	while True:
-		for v in [13.5, 13, 12.5]:
-			setActuator(vl,v,1)
-			for h in [10, 11, 12]:
+		for v in [0.0013, 0.0012, 0.0011]:
+			setActuator(verticalL,v)
+			for h in [0.0009, 0.0011, 0.0013]:
 				thresholds = [700, 600]
 				threshold = thresholds[random.randrange(0,2)]
+				threshold = 700
 				print threshold
-				setActuator(hl,h,1)
+				setActuator(horizontalL,h)
 				successes = 0
 				while successes < 3:
 					#get new data
@@ -116,7 +105,7 @@ def main():
 						reset = True
 						break
 						
-					if (leverL > threshold and nose < 100 and currentTime - rewardTime > timeout):
+					if (leverL > threshold):# and nose < 100 and currentTime - rewardTime > timeout):
 						successes = successes + 1
 						rewardTime = time.time()
 						pump.start(50)
@@ -128,10 +117,10 @@ def main():
 					#log data if change
 					if LOGGING:	
 						data = open(fileName,"a")
-						data.write(str(currentTime) + "," + str(leverL) + "," + str(leverR) + "," + str(nose) + "," + str(threshold))	
+						data.write(str(currentTime) + "," + str(leverL) + "," + str(nose) + "," + str(threshold) + "," + str(h) + "," + str(v) + "\n")	
 						data.close()
 					
-					time.sleep(0.05)
+					time.sleep(0.016)
 				successes = 0
 				if reset:
 					break
