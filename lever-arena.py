@@ -74,9 +74,9 @@ def main():
 	#Loop through vl 9.5  11.5 13.5
 	# 						hl 10.5 12.0 13.5 15.0
 	while True:
-		for v in [0.0013, 0.0012, 0.0011]:
+		for v in [0.00130, 0.00120, 0.00110]:
 			setActuator(verticalL,v)
-			for h in [0.0009, 0.0011, 0.0013]:
+			for h in [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]:
 				thresholds = [700, 600]
 				threshold = thresholds[random.randrange(0,2)]
 				threshold = 700
@@ -105,12 +105,13 @@ def main():
 						reset = True
 						break
 						
-					if (leverL > threshold):# and nose < 100 and currentTime - rewardTime > timeout):
+					if (leverL > threshold and nose < 100 and currentTime - rewardTime > timeout):
 						successes = successes + 1
 						rewardTime = time.time()
+						#pump parameters
 						pump.start(50)
 						GPIO.output(LED,True)
-						time.sleep(0.5)
+						time.sleep(0.3)
 						GPIO.output(LED,False)
 						pump.stop()
 
