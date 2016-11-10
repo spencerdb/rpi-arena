@@ -1,130 +1,162 @@
 #!/usr/bin/python
-import spidev #SPI interface
+import spidev  # SPI interface
 import time
-import firgelli
+#import firgelli
 import mcp3002
 import RPi.GPIO as GPIO
 import os
-import datetime
-import random
-from servo import setActuator
+from datetime import datetime as dt
+#from servo import setActuator
+from lever_class import Lever
 
-#gdrive
+# XXX Do not run multiple instances of this program at once (or it will confuse position tracking)!
+
+# gdrive
 LOGGING = True
 
-
-#Pin Definition 
-pump = 5
-# at 100hz
-verticalR = 26
-verticalL = 19 # 13.5% - 9.5%
-horizontalR = 13
-horizontalL = 6 # 15.5% - 10%
-power = 14
-LED = 15
-
-
-#pin setup
-GPIO.setmode(GPIO.BCM)
-for pin in [pump, verticalR, verticalL, horizontalR, horizontalL, LED]:
-	GPIO.setup(pin, GPIO.OUT) 
-
-GPIO.setup(power,GPIO.IN)
-pump = GPIO.PWM(5,1000)
-
-#Task parameters
-timeout = 4 #time in seconds
-rewardTime = time.time()
-threshold = 600 #to be changed later
-previousLever = 0
-
-#State Parameters
-leverL = 0
-leverR = 0
-nose = 0
-currentTime = time.time()
-
-#Task Parameters
+# Arena params
+v_positions = [0.00130, 0.00120, 0.00110]
+h_positions = [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]
+threshold = 700
+timeout = 4  # Reward refractory period in seconds
+#rewardTime = time.time()
 successes = 0
+tot_successes = 0
+rewardTime = 0
+last_arena_pos = (0, 0)
 
-#log file
-fileName = datetime.datetime.fromtimestamp(time.time()).strftime("%y,%m,%d,%H,%M,%S")
-#make data folder if doesn't exist
+#################
+# Pin definitions
+#################
+#pin_v_act_R = 26
+#pin_h_act_R = 13
+pin_v_act_L = 19  # Vertical actuator, left; 13.5% - 9.5%
+pin_h_act_L = 6   # Horizontal actuator, left; 15.5% - 10%
+pin_pump = 5
+pin_power = 14
+pin_LED = 15
+pin_v_act_manual = 17  # pin to manually advance vertical position
+pin_h_act_manual = 27  # pin to manually advance horizontal position
+
+#######################################
+# Initialize pins
+#######################################
+GPIO.setmode(GPIO.BCM)
+for temp_pin in [pin_pump, pin_LED]:
+    GPIO.setup(temp_pin, GPIO.OUT)
+pump = GPIO.PWM(5, 1000)
+
+for temp_pin in [pin_power]:
+    GPIO.setup(temp_pin, GPIO.IN)
+for temp_pin in [pin_v_act_manual, pin_h_act_manual]:
+    GPIO.setup(temp_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# Create lever object
+lever_obj = Lever(pin_v_act_L, pin_h_act_L, h_positions, v_positions,
+                  threshold, verbose=True)
+lever_obj.reset_pos()  # Move lever back to initial position
+time.sleep(1.5)
+
+# Threaded callback functions. These will execute the specified callback
+# functions independent of the main loop
+# XXX: THESE SEEM TO GET CALLED TWICE RANDOMLY, DON'T USE
+#GPIO.add_event_detect(pin_v_act_manual, GPIO.FALLING,
+#                      callback=advance_v_pos_wrapper, bouncetime=1000)
+#GPIO.add_event_detect(pin_h_act_manual, GPIO.FALLING,
+#                      callback=advance_h_pos_wrapper, bouncetime=1000)
+
+# Check for power switch. MAKE SURE THIS IS ON THE RIGHT PIN
+#GPIO.add_event_detect(pin_power, GPIO.RISING,
+#                      callback=os.system('sudo shutdown -h now'))
+
+####################
+# Setup log file
+####################
+animal_number = raw_input("Input animal number and press ENTER: ")
+stim_state = raw_input("Will the animal be stimulated? Input ON or OFF and press ENTER: ")
+print('Begin training animal ' + str(animal_number) + ', stimulator ' + str(stim_state))
+fileName = (dt.fromtimestamp(time.time()).strftime("%y,%m,%d,%H,%M,%S")+str('_rat_')+str(animal_number)+str('_stim_')+str(stim_state))
+
+# Make data folder if doesn't exist
 try:
-	os.makedirs('data')
+    os.makedirs('data')
 except OSError:
-	if not os.path.isdir('data'):
-		raise
+    if not os.path.isdir('data'):
+        raise
 fileName = "data/" + fileName + ".csv"
 if LOGGING:
-	data = open(fileName,"w")
-	data.write("time,leverL,nose,threshold,horizontal,vertical\n")
-	data.close()
+    with open(fileName, 'w') as data_file:
+        data_file.write("time,leverL,nose,threshold,horizontal,vertical\n")
 
-#main program loop for non-time critical tasks
-def main():
-	lever = mcp3002.init(0)
-	poke = mcp3002.init(1)
-	rewardTime = time.time()
-	resetTimer = time.time()
-	resetTime = 10
-	reset = False
-	#reset the actuator to default position
-	time.sleep(0.5)
-	#Loop through vl 9.5  11.5 13.5
-	# 						hl 10.5 12.0 13.5 15.0
-	while True:
-		for v in [0.00130, 0.00120, 0.00110]:
-			setActuator(verticalL,v)
-			for h in [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]:
-				thresholds = [700, 600]
-				threshold = thresholds[random.randrange(0,2)]
-				threshold = 700
-				print threshold
-				setActuator(horizontalL,h)
-				successes = 0
-				while successes < 3:
-					#get new data
-					[leverL,leverR] = mcp3002.read(lever) 
-					[adc3,nose] = mcp3002.read(poke) 
-					currentTime = time.time()
 
-					#check for power switch
-					if (GPIO.input(14) > 0):
-						os.system("sudo shutdown -h now")
-					
-					#reset switching
-					#put into function
-					if leverL > 400:
-						resetTimer = time.time()
-						GPIO.output(LED,False)
-					if leverL < 400:
-						GPIO.output(LED,True)
-					if (time.time() - resetTimer > resetTime):
-						GPIO.output(LED,False)
-						reset = True
-						break
-						
-					if (leverL > threshold and nose < 100 and currentTime - rewardTime > timeout):
-						successes = successes + 1
-						rewardTime = time.time()
-						#pump parameters
-						pump.start(50)
-						GPIO.output(LED,True)
-						time.sleep(0.3)
-						GPIO.output(LED,False)
-						pump.stop()
+def give_reward():
+    """Helper function to turn on water"""
 
-					#log data if change
-					if LOGGING:	
-						data = open(fileName,"a")
-						data.write(str(currentTime) + "," + str(leverL) + "," + str(nose) + "," + str(threshold) + "," + str(h) + "," + str(v) + "\n")	
-						data.close()
-					
-					time.sleep(0.016)
-				successes = 0
-				if reset:
-					break
-			if reset:
-				break
-main()
+    print "\tSuccess number %i. (%i total)" % (successes, tot_successes)
+    pump.start(50)
+    GPIO.output(pin_LED, True)
+    time.sleep(0.3)
+    GPIO.output(pin_LED, False)
+    pump.stop()
+
+####################
+# Main program loop
+####################
+# Initialize lever and nose sensors
+lever_sensor = mcp3002.init(0)
+poke_sensor = mcp3002.init(1)
+
+# Set initial position of lever/nose sensors
+last_arena_pos = (mcp3002.read(lever_sensor)[0], mcp3002.read(poke_sensor)[1])
+
+while successes < 3:
+    currentTime = time.time()
+
+    # Get new data from lever and nose sensors
+    leverL, leverR = mcp3002.read(lever_sensor)
+    adc3, nose = mcp3002.read(poke_sensor)
+
+    # Check for button press to manually advance
+    v_manual_btn, h_manual_btn = GPIO.input(pin_v_act_manual), GPIO.input(pin_h_act_manual)
+    if v_manual_btn == False:
+        lever_obj.advance_v_pos(manual=True)
+        successes = 0
+        time.sleep(0.5)
+    if h_manual_btn == False:
+        lever_obj.advance_h_pos(manual=True)
+        successes = 0
+        time.sleep(0.5)
+
+    # Check for successful trial
+    if (leverL > lever_obj.threshold and
+        nose < 100 and
+        currentTime - rewardTime > timeout):
+
+        successes = successes + 1
+        tot_successes = tot_successes + 1
+        rewardTime = time.time()
+        give_reward()  # Activate pump/LED
+
+        # Check if we need to advance to next position
+        if successes >= 3:
+            successes = 0
+            lever_obj.advance_lever()
+            time.sleep(1)  # Give time for actuators to move. Necessary?
+
+        # Should this data only be logged on a successful trial, right?
+
+    if LOGGING:
+        # Check if lever or nose sensors have changed since last loop
+        if (leverL, nose) != last_arena_pos:
+            last_arena_pos = (leverL, nose)
+
+            # Write data
+            data_file = open(fileName, 'a')  # open file in append mode
+            data_file.write(str(currentTime) + "," + str(leverL) + "," +
+                            str(nose) + "," + str(threshold) + "," +
+                            str(lever_obj.get_h_pos()) + "," +
+                            str(lever_obj.get_v_pos()) + "\n")
+            #print "Lever: %i\tNose: %i" % last_arena_pos
+            data_file.close()
+
+    time.sleep(0.016)

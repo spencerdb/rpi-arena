@@ -10,36 +10,37 @@ import re
 import servo
 import RPi.GPIO as GPIO
 from mcp3208 import mcp3208 
+import threading
 
-hardware = '2.7'
+
 
 #pin definitions
 #actuators
-HL0_PIN = 5
+HL0 = 5
 HL0_CH = 15
-VL0_PIN = 6
+VL0 = 6
 VL0_CH = 14
-HR0_PIN = 12
+HR0 = 12
 HR0_CH = 13
-VR0_PIN = 13
+VR0 = 13
 VR0_CH = 12
-HL1_PIN = 16
+HL1 = 16
 HL1_CH = 11
-VL1_PIN = 19
+VL1 = 19
 VL1_CH = 10
-VR1_PIN = 20
+VR1 = 20
 VR1_CH = 9
-HR1_PIN = 26
+HR1 = 26
 HR1_CH = 8
 
 #BNC 
-BNC0_PIN = 2
+BNC0 = 2
 BNC0_CH = 4
-BNC1_PIN = 3
+BNC1 = 3
 BNC1_CH = 5
-BNC2_PIN = 14
+BNC2 = 14
 BNC2_CH = 6
-BNC3_PIN = 4
+BNC3 = 4
 BNC3_CH = 7
 
 
@@ -63,11 +64,14 @@ PUMP1 = 27
 HIGH = 1
 LOW = 0
 
-class LeverArena27:
+class Arena:
 
 
 	def __init__(self):
 		
+		#hardware revision	
+		self.hardware = '2.7'
+
 		#initialize ADCs 	
 		self.adc0 = mcp3208(0)
 		self.adc1 = mcp3208(1)	
@@ -76,7 +80,7 @@ class LeverArena27:
 		GPIO.setmode(GPIO.BCM)
 		
 		#default all pins to output LOW
-		for pin in [HL0_PIN, VL0_PIN, HR0_PIN, VR0_PIN, HL1_PIN, VL1_PIN, VR1_PIN, HR1_PIN, BNC0_PIN, BNC1_PIN, BNC2_PIN, BNC3_PIN, PUMP0, PUMP1]:
+		for pin in [HL0, VL0, HR0, VR0, HL1, VL1, VR1, HR1, BNC0, BNC1, BNC2, BNC3, PUMP0, PUMP1]:
 			GPIO.setup(pin,GPIO.OUT)	
 			GPIO.output(pin,GPIO.LOW)
 
@@ -115,7 +119,20 @@ class LeverArena27:
 		#pump pins
 		self.pump0 = -1
 		self.pump1 = -1
-			
+
+	#threaded actuator set method to enable coninued data collection
+	def setActuator(self, pin, time):
+		actuatorThread = threading.Thread(target = servo.setActuator, args = (pin,time))
+		actuatorThread.start()		
+		return 0
+		
+	def setAcuatorPercent(self, pin, percent):
+		if percent > 100:
+			return -1
+		time = ((percent / 100000) + 0.001)
+		self.setActuator(pin, time)
+		return 0
+
 	#return the digital value of pin
 	def digitalRead(self,pin):
 		GPIO.setmode(GPIO.BCM)
@@ -140,14 +157,15 @@ class LeverArena27:
 		return self.adc1.readChannel(channel % 8)
 		
 	#update all analog values from hardware 
-	def updateAnalog(self):
+	def adc(self):
 		#read adcs	        
 		[self.RL0_0, self.RL0_1, self.LL0_0, self.LL0_1, self.LL1_0, self.LL1_1, self.RL1_0, self.RL1_1] = self.adc0.readADC()
 		[self.HR1, self.VR1, self.VL1, self.HL1, self.VR0, self.HR0, self.VL0, self.HL0] = self.adc1.readADC()
+		return [self.RL0_0, self.RL0_1, self.LL0_0, self.LL0_1, self.LL1_0, self.LL1_1, self.RL1_0, self.RL1_1, self.HR1, self.VR1, self.VL1, self.HL1, self.VR0, self.HR0, self.VL0, self.HL0]
 
 			
 	def pwm(self, pin, ms, hz=50):
-			
+		return 0
 		
         #clean up GPIO 
 	def __del__(self):
