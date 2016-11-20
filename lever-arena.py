@@ -57,18 +57,6 @@ lever_obj = Lever(pin_v_act_L, pin_h_act_L, h_positions, v_positions,
 lever_obj.reset_pos()  # Move lever back to initial position
 time.sleep(1.5)
 
-# Threaded callback functions. These will execute the specified callback
-# functions independent of the main loop
-# XXX: THESE SEEM TO GET CALLED TWICE RANDOMLY, DON'T USE
-#GPIO.add_event_detect(pin_v_act_manual, GPIO.FALLING,
-#                      callback=advance_v_pos_wrapper, bouncetime=1000)
-#GPIO.add_event_detect(pin_h_act_manual, GPIO.FALLING,
-#                      callback=advance_h_pos_wrapper, bouncetime=1000)
-
-# Check for power switch. MAKE SURE THIS IS ON THE RIGHT PIN
-#GPIO.add_event_detect(pin_power, GPIO.RISING,
-#                      callback=os.system('sudo shutdown -h now'))
-
 ####################
 # Setup log file
 ####################
@@ -90,7 +78,7 @@ if LOGGING:
 
 
 def give_reward():
-    """Helper function to turn on water"""
+    #Helper function to turn on water
 
     print "\tSuccess number %i. (%i total)" % (successes, tot_successes)
     pump.start(50)
