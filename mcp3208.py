@@ -24,9 +24,9 @@ class mcp3208:
 	def readChannel(self, channel):
 		if (channel > 7 or channel < 0):
 			return -1
-		readBytes = self.spi.xfer2([1, 8 + channel << 4, 0])
+		readBytes = self.spi.xfer2([6 + ((channel&4) >> 2),(channel&3) <<6, 0])
 		#with default spi configuration mcp3208 is LSB first
-		self.values[channel] = (((readBytes[2] & 15) << 8) + readBytes[1])
+		self.values[channel] = (((readBytes[1] & 15) << 8) + readBytes[2])
 		return self.values[channel]
 
 	#Close the spi device
