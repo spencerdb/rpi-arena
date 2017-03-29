@@ -20,9 +20,9 @@ HL0 = 5
 HL0_CH = 15
 VL0 = 6
 VL0_CH = 14
-HR0 = 12
+HR0 = 13
 HR0_CH = 13
-VR0 = 13
+VR0 = 12
 VR0_CH = 12
 HL1 = 16
 HL1_CH = 11
@@ -120,11 +120,21 @@ class Arena:
 		self.pump0 = -1
 		self.pump1 = -1
 
-	#threaded actuator set method to enable coninued data collection
+	#set actuator at pin to 0.001<time<0.002
 	def setActuator(self, pin, time):
-		actuatorThread = threading.Thread(target = servo.setActuator, args = (pin,time))
+		actuatorThread = threading.Thread(target = self.setActuatorThread, args = (pin,time))
 		actuatorThread.start()		
 		return 0
+
+	def setActuatorThread(self,pin,delay):
+		start = time.time()
+		current = time.time()
+		while current - start < 1:
+			self.digitalWrite(pin,1)	
+			time.sleep(delay)
+			self.digitalWrite(pin,0)
+			time.sleep(0.05)
+			current = time.time()
 		
 	def setAcuatorPercent(self, pin, percent):
 		if percent > 100:

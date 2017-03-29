@@ -1,85 +1,133 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-#Raspberry pi includes
-import RPi.GPIO as GPIO
+from Arena import *
 import time
-import spidev #SPI 
+import numpy
+import random
+from datetime import datetime as dt
 
-#Google Drive imports
-from oauth2client.service_account import ServiceAccountCredentials
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
+class LeverTask:
+    def __init__(self, animalNumber, studyNumber):
 
-#initialize Google Drive Credentials and connect
-oauthfile = 'lever-arena-01-d2618fc356b1.json'
-scope = ['https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name(oauthfile,scope)
-gauth = GoogleAuth()
-gauth.credentials = credentials
-gauth.Authorize()
-drive = GoogleDrive(gauth)
-#TODO ensure continued program function if google drive doesn't load
+        #Arena handling class
+        self.arena = Arena()
 
-#Create new file to log data to
-dataFile = open('debug.csv', 'w') #open file for writing
-driveFile = drive.CreateFile({'parents' : [{'id' : '0B8LTj-6zmvAPQTZZS2tSaXR4UTA'}],'title': 'debug.csv'})
+        #Parameters
+        self.vPositions = [0.00130, 0.00120, 0.00110]
+        self.hPositions = [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]
+        self.thresholdLeft = 3200
+        self.thresholdRight = 3200
+        self.timeout = 4
+        self.maxSuccesses = 3
+        self.enableLeft = False
+        self.enableRight = True
+        self.noseThreshold = 1000
 
-
-#state variables
-running = True
-count = 0
-
-#Pin Definitions
-pump = 5
-verticalR = 26
-verticalL = 19
-horizontalR = 13 
-horizontalL = 6 
+        #servos
+        self.hr = HR1
+        self.vr = VR1
+        self.vl = VL1
+        self.hl = HL1
+        self.servos = [self.hr, self.vr, self.vl, self.hl]
 
 
-#initialize GPIO pins for linear actuators 
-GPIO.setmode(GPIO.BCM)
-for pin in [pump, verticalR, verticalL, horizontalR, horizontalL]:
-    GPIO.setup(pin, GPIO.OUT)
-horizontalRP = GPIO.PWM(horizontalR, 20)
+        #adc channels
+        self.rx = LL0_CH0
+        self.ry = LL0_CH1
+        self.lx = RL0_CH0
+        self.ly = RL0_CH1
+        self.noseCH = BNC3_CH
+        
+        #pump
+        self.pump = arena.GPIO.PWM(PUMP1)
+    
+        
+        #Data values
+        self.leverL = 0
+        self.leverR = 0
+        self.nose = 0
+        self.index = 0
+        self.successes = 0
+        self.totalSuccesses = 0
+        self.reward = 0
+        self.rewardTime = -4
 
-#horizontalRP.start(2.2)
-#time.sleep(5)
-#horizontalRP.ChangeDutyCycle(2)
-#time.sleep(5)
-#horizontalRP.stop()
+        #io
+        self.pinLED = 15
+        self.pinSuccess = 14
+        
+        self.animalNumber = animalNumber
+        self.studyNumber = studyNumber
+        
+        #setup logging
+        ##make folder if DNE
+        directory = "data/" + self.studyNumber + "/" + self.animalNumber
+        try:
+            os.makedirs(directory)
+        except OSError:
+            if not os.path.isdir(directory)
+                raise
+        fileName = (dt.fromtimestamp(time.time()).strftime("%y,%m,%d,%H,%M,%S"))
+        self.fileName = directory + "/" + fileName
+        
+        
 
-# function to read from the mcp3002
-def readMCP3002(device):
-     
-    spi = spidev.SpiDev(0,0)
-    spi.open(0,device)
-    msb = spi.xfer([0x70]) #ADC channel 1
-    lsb = spi.xfer([0])
-    adc1 = msb[0]<<8|lsb[0]
-    msb = spi.xfer([0x60]) #ADC channel 2
-    lsb = spi.xfer([0])
-    adc2 = msb[0]<<8|lsb[0]
-    spi.close()
-    return [adc1,adc2]
+         
+    def update(self):
+        """update state based on arena inputs values"""
+        self.leverL = self.arena.analogRead(self.lx)
+        self.leverR = self.arena.analogRead(self.rx)
+        self.nose = self.arena.analogRead(self.noseCH)
+        nose = self.nose > noseThreshold
+        timeout = 
+        left = (self.leverL > self.thresholdLeft) * self.enableLeft * nose
+        right = (self.leverR > self.thresholdRight) * self.enableRight * nose
 
-start = time.time()
-# main loop for motor control etc
-try:
-    while running:
-        now = round((time.time()-start) * 1000,2)
-        [leftLever, rightLever] = readMCP3002(0)
-        dataFile.write("," + repr(leftLever) + "," + repr(rightLever)+ "\n")
-        dataFile.write(repr(now)) #time ms
-      
-        print leftLever,
-        print rightLever,
-        print now
-        time.sleep(0.001)
-        count = (count + 1) % 5000
+        if (left or right):
+            self.rewardTime = time.time()
+            self.successes = self.successes + 1
+            self.totalSuccesses = self.totalSuccesses + 1
+            self.index = self.index + 1
+            self.giveReward()
+           
+        if (successes >= maxSuccesses):
+            """advance to next position"""
+            horizontal = self.index % 5
+            vertical = int(numpy.floor(self.index / 5))
+            horizontal = self.hPositions(horizontal)
+            vertical = self.vPositions(vertical)
+            
+        self.vPositions = [0.00130, 0.00120, 0.00110]
+        self.hPositions = [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]
+            
+            if (enabledRight):
+                self.arena.setActuator(self.hr,horizontal)
+                self.arena.setActuator(self.vr,vertical)
+                
+            if (enabledLeft):
+                self.arena.setActuator(self.hl,horizontal)
+                self.arena.setActuator(self.vl,vertical)
+            
+        
+        
+        
+    def setPosition(self,lv,lh,rv,rh):
+        """function to set actuators to new position
+        """
+        self.arena.setActuator(self.vr,rv)
+        self.arena.setActuator(self.hr,rh)
+        self.arena.setActuator(self.vl,lv)
+        self.arena.setActuator(self.hl,lh)
 
-
-except KeyboardInterrupt:
-    GPIO.cleanup()
-    dataFile.close()
-
+        
+    def giveReward(self):
+        """Helper function to deliver pump reward"""
+        self.pump.start(50) 
+        self.arena.digitalWrite(self.pinLED, 1)
+        self.arena.digitalWrite(self.pinSuccess, 1)
+        time.sleep(0.3)
+        self.arena.digitalWrite(self.pinLED, 0)
+        self.arena.digitalWrite(self.pinSuccess, 0)
+        self.pump.stop()
+        
+        

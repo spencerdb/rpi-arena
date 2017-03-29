@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>889</width>
+    <height>617</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>lever-arena v1.0</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QWidget" name="formLayoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>110</y>
+      <width>201</width>
+      <height>203</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="manual_layout">
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Left Lever</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="label_6">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Right Lever</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLineEdit" name="lLever"/>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="rLever"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Left Horizontal</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLabel" name="label_9">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Right Horizontal</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLineEdit" name="lHorizontal"/>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="rHorizontal"/>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_8">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Left Vertical</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLabel" name="label_10">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Right Vertical</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLineEdit" name="lVertical"/>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="rVertical"/>
+     </item>
+     <item row="9" column="0">
+      <widget class="QRadioButton" name="lEnable">
+       <property name="text">
+        <string>Left Enable</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="QRadioButton" name="rEnable">
+       <property name="text">
+        <string>Right Enable</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QPushButton" name="mSet">
+       <property name="text">
+        <string>Set</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="manual_label">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Manual Control</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="formLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>160</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <layout class="QFormLayout" name="log_layout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Study</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="study"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Animal #</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="animal"/>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="label">
+       <property name="toolTipDuration">
+        <number>-3</number>
+       </property>
+       <property name="text">
+        <string>Logging</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QRadioButton" name="logging">
+       <property name="text">
+        <string>Logging</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="start">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>320</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stop">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>320</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
