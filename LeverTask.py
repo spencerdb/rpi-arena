@@ -36,8 +36,8 @@ class LeverTask:
         #adc channels
         self.ly = LL0_CH0
         self.lx = LL0_CH1
-        self.ry = RL0_CH0
-        self.rx = RL0_CH1
+        self.rx = RL0_CH0
+        self.ry = RL0_CH1
         self.noseCH = BNC3_CH
         
         #pump
@@ -84,7 +84,7 @@ class LeverTask:
         oldLeverR = self.leverR
         self.time = time.time()
         self.leverL = self.arena.analogRead(self.ly)
-        self.leverR = self.arena.analogRead(self.ry)
+        self.leverR = self.arena.analogRead(self.rx)
         self.nose = self.arena.analogRead(self.noseCH)
         self.nose = self.nose < self.noseThreshold
         nose = self.nose
@@ -100,7 +100,7 @@ class LeverTask:
             self.giveReward()
            
         if (self.successes >= self.maxSuccesses):
-            self.setIndex(self.index + 1)
+            self.setIndex(random.randint(0,14))
             self.updatePosition()
             
         """log data"""
@@ -116,10 +116,12 @@ class LeverTask:
                            str(success) + "\n")
             dataFile.close()
                         
-        return [self.time,self.leverL,self.leverR,self.nose,self.thresholdLeft*self.enableLeft,self.thresholdRight*self.enableRight,self.hPositions[self.index % 5],self.vPositions[int(numpy.floor(self.index / 5))], success]
+        return [self.time,self.leverL,self.leverR,self.nose,self.thresholdLeft*self.enableLeft,self.thresholdRight*self.enableRight,self.index,self.hPositions[self.index % 5],self.vPositions[int(numpy.floor(self.index / 5))], success]
     
 
     def setIndex(self,index):
+        if index == self.index:
+            return
         self.index = index
         self.updatePosition()
     def updatePosition(self):

@@ -9,13 +9,13 @@ from PyQt5.QtGui import QIntValidator
 import mainwindow_auto
 from PyQt5 import QtGui
 from PyQt5.QtCore import QThread, pyqtSignal, QMutex
-from Arena import *
 
 
 #general imports
 import time
 import os
 import threading
+from LeverTask import *
 
 #Arena Thread class
 class ArenaThread(QThread):
@@ -23,39 +23,28 @@ class ArenaThread(QThread):
     trigger = pyqtSignal()
     stop = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self,studyNumber,animalNumber):
         QThread.__init__(self)
         self.mutex = QMutex()
         self.running = True
-        self.params = [0,1]
-        self.arena = Arena()
+        self.task = LeverTask(str(studyNumber),str(animalNumber))
+        self.index = 0
+        self.indexChanged = True
         
-        #TODO move defaults to external file
-        #Default values
-        self.threshold = 3200
-        self.v_positions = [0.00130, 0.00120, 0.00110]
-        self.h_positions = [0.00105, 0.00115, 0.00125, 0.00135, 0.00145]
-        self.timeout = 4
-        self.requiredSuccesses = 3
-        self.successes = 0
-        self.pinLED = 15
-        self.pinSuccess = 14  
-        self.logging = True #log by default 
-        
-        
-
-    def update(self):
-        adc = self.arena.adc()
-        print(adc)
-        self.trigger.emit()
-        return [-1 -1]
 
 
     def run(self):
         print('run')
         while(self.running):
             time.sleep(0.1)
-            self.update()
+            if(self.indexChanged):
+                self.indexChanged = False   
+                self.task.setIndex(self.index)
+            print(self.task.update()) 
+        
+    def setIndex(self,index):
+        self.indexChanged = True
+        self.index = index
 
 
 
@@ -82,7 +71,23 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.mSet.clicked.connect(lambda: self.mSetClicked())
         self.stop.clicked.connect(lambda: self.stopClicked())
         self.start.clicked.connect(lambda: self.startClicked())
-
+		
+        self.mButtons = [self.mButton1, self.mButton2, self.mButton3, self.mButton4, self.mButton5, self.mButton6, self.mButton7, self.mButton8, self.mButton9, self.mButton10, self.mButton11, self.mButton12, self.mButton13, self.mButton14, self.mButton15]
+        self.mButtons[0].clicked.connect(lambda: self.arenaThread.setIndex(0))
+        self.mButtons[1].clicked.connect(lambda: self.arenaThread.setIndex(1))
+        self.mButtons[2].clicked.connect(lambda: self.arenaThread.setIndex(2))
+        self.mButtons[3].clicked.connect(lambda: self.arenaThread.setIndex(3))
+        self.mButtons[4].clicked.connect(lambda: self.arenaThread.setIndex(4))
+        self.mButtons[5].clicked.connect(lambda: self.arenaThread.setIndex(5))
+        self.mButtons[6].clicked.connect(lambda: self.arenaThread.setIndex(6))
+        self.mButtons[7].clicked.connect(lambda: self.arenaThread.setIndex(7))
+        self.mButtons[8].clicked.connect(lambda: self.arenaThread.setIndex(8))
+        self.mButtons[9].clicked.connect(lambda: self.arenaThread.setIndex(9))
+        self.mButtons[10].clicked.connect(lambda: self.arenaThread.setIndex(10))
+        self.mButtons[11].clicked.connect(lambda: self.arenaThread.setIndex(11))
+        self.mButtons[12].clicked.connect(lambda: self.arenaThread.setIndex(12))
+        self.mButtons[13].clicked.connect(lambda: self.arenaThread.setIndex(13))
+        self.mButtons[14].clicked.connect(lambda: self.arenaThread.setIndex(14))
         #signals
 
     #manual set button handler
@@ -95,7 +100,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def startClicked(self):
 		## TODO start logging
         self.start.setEnabled(False)
-        self.arenaThread = ArenaThread()
+        self.arenaThread = ArenaThread(self.study.text(),self.animal.text())
         self.arenaThread.trigger.connect(self.updateGUI)
         self.arenaThread.start()
         return
