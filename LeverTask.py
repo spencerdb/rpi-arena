@@ -9,7 +9,11 @@ import os
 import threading
 
 class LeverTask:
-    def __init__(self, studyNumber, animalNumber):
+    def __init__(self, params):
+		#params [studyNumber,animalNumber,leftLever,RightLever,lEnable,rEnable,success#]
+	
+        self.animalNumber = params[1]
+        self.studyNumber = params[0]
 
         #Arena handling class
         self.arena = Arena()
@@ -36,8 +40,8 @@ class LeverTask:
         #adc channels
         self.ly = LL0_CH0
         self.lx = LL0_CH1
-        self.rx = RL0_CH0
-        self.ry = RL0_CH1
+        self.ry = RL0_CH0
+        self.rx = RL0_CH1
         self.noseCH = BNC3_CH
         
         #pump
@@ -59,8 +63,6 @@ class LeverTask:
         self.pinLED = 15
         self.pinSuccess = 14
         
-        self.animalNumber = animalNumber
-        self.studyNumber = studyNumber
         
         #setup logging
         ##make folder if DNE
@@ -84,7 +86,7 @@ class LeverTask:
         oldLeverR = self.leverR
         self.time = time.time()
         self.leverL = self.arena.analogRead(self.ly)
-        self.leverR = self.arena.analogRead(self.rx)
+        self.leverR = self.arena.analogRead(self.ry)
         self.nose = self.arena.analogRead(self.noseCH)
         self.nose = self.nose < self.noseThreshold
         nose = self.nose
@@ -116,7 +118,8 @@ class LeverTask:
                            str(success) + "\n")
             dataFile.close()
                         
-        return [self.time,self.leverL,self.leverR,self.nose,self.thresholdLeft*self.enableLeft,self.thresholdRight*self.enableRight,self.index,self.hPositions[self.index % 5],self.vPositions[int(numpy.floor(self.index / 5))], success]
+		#return vars [leftLever, rightLever, success, total,time]
+        return [self.leverL, self.leverR, self.successes, self.totalSuccesses]
     
 
     def setIndex(self,index):
