@@ -7,7 +7,6 @@ boyer2@uw.edu
 import time
 import numpy
 import re
-import servo
 import RPi.GPIO as GPIO
 from mcp3208 import mcp3208 
 import threading
